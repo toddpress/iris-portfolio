@@ -78,8 +78,9 @@ body {
     height: 24px;
     pointer-events: none;
     z-index: 9999;
-    transform: rotate(45deg) translate(-50%, -50%);
-    transform-origin: top left;
+    /* JS sets left/top to (mouseX - halfW, mouseY - halfH) and transform to rotate(θ);
+       origin at center so the rocket spins in place around the pointer. */
+    transform-origin: center;
     top: 0;
     left: 0;
 }
@@ -187,4 +188,114 @@ body {
 
 .glow:hover {
     box-shadow: 0 0 15px 5px rgba(59, 130, 246, 0.5);
+}
+
+/* Fallback overlay shown when a project's demo image fails to load.
+   Hides the browser's default broken-image glyph/alt text and replaces
+   it with a subtle gradient plus a "<Title> (Coming Soon)" label. */
+.project-media-fallback {
+    background: linear-gradient(135deg, #1e40af59 0%, #0f1016bf 100%);
+    backdrop-filter: blur(2px);
+    border-bottom: 1px solid rgba(59, 130, 246, 0.3);
+    color: #bfdbfe;
+    text-align: center;
+    padding: 1rem;
+    overflow: hidden;
+    isolation: isolate;
+}
+
+/* Light-blue gradient sweep across empty "Coming Soon" cards on hover. */
+.project-media-fallback::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(115deg,
+        transparent 20%,
+        rgba(147, 197, 253, 0.18) 45%,
+        rgba(191, 219, 254, 0.28) 55%,
+        transparent 80%);
+    transform: translateX(-120%);
+    transition: transform 1100ms cubic-bezier(0.22, 1, 0.36, 1);
+    pointer-events: none;
+    z-index: 0;
+}
+
+.project-card:hover .project-media-fallback::before,
+.project-card:focus-within .project-media-fallback::before {
+    transform: translateX(120%);
+}
+
+.project-media-fallback__label,
+.project-media-fallback__note {
+    position: relative;
+    z-index: 1;
+}
+
+.project-media-fallback__label {
+    font-size: 1.05rem;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.project-media-fallback__note {
+    margin-top: 0.4rem;
+    font-size: 0.65rem;
+    font-weight: 400;
+    font-variant: all-small-caps;
+    color: #93c5fd;
+    opacity: 0.7;
+    letter-spacing: 0.05em;
+}
+
+/* Populated cards (image or video) are clean and sharp at rest.
+   Hovering anywhere on the card scales + blurs the media so attention
+   flows to the text; hovering the media itself lifts the blur so the
+   user can inspect the frame. Skipped while a video is actually
+   playing. */
+.project-media-frame .project-media-image {
+    transition: transform 700ms cubic-bezier(0.22, 1, 0.36, 1),
+                filter 700ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.project-card:hover .project-media-image:not(.is-playing),
+.project-card:focus-within .project-media-image:not(.is-playing) {
+    transform: scale(1.05);
+    filter: blur(4px);
+}
+
+.project-card:hover .project-media-frame:hover .project-media-image:not(.is-playing),
+.project-card:focus-within .project-media-frame:focus-within .project-media-image:not(.is-playing) {
+    filter: blur(0);
+}
+
+/* Hover wash — invisible at rest, gentle darken on card hover for
+   both image and video cards. */
+.project-media-wash {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background-color: rgba(2, 6, 23, 0);
+    transition: background-color 500ms ease-out;
+}
+
+.project-card:hover .project-media-wash,
+.project-card:focus-within .project-media-wash {
+    background-color: rgba(2, 6, 23, 0.32);
+}
+
+/* Play chip — solid white puck with a blue triangle. Fades + scales
+   in on card hover so users know the video is watchable before they
+   commit to the media itself. */
+.project-play-chip {
+    opacity: 0;
+    transform: scale(0.85);
+    transition: opacity 500ms cubic-bezier(0.22, 1, 0.36, 1),
+                transform 500ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.project-card:hover .project-play-chip,
+.project-card:focus-within .project-play-chip {
+    opacity: 1;
+    transform: scale(1);
 }
